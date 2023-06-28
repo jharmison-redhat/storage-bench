@@ -62,12 +62,17 @@ cm="$(oc get $(oc logs job/storage-bench -n storage-bench | tail -1 | cut -d' ' 
 
 # save in configmap name (unix timestamped)
 dir="logs/$(echo "$cm" | jq -r '.metadata.name')"
-mkdir -p "$dir"
+if [ ! -d "$dir" ]; then
+    mkdir -p "$dir"
 
-# pull logs from configmap
-for log in $(echo "$cm" | jq -r '.data | keys[]'); do
-    echo "$cm" | jq -r '.data["'"$log"'"]' > "$dir/$log"
-done
+    echo -n "Recovering results."
+    # pull logs from configmap
+    for log in $(echo "$cm" | jq -r '.data | keys[]'); do
+        echo -n .
+        echo "$cm" | jq -r '.data["'"$log"'"]' > "$dir/$log"
+    done
+    echo
+fi
 
 # clean up if asked for
 if $delete; then
