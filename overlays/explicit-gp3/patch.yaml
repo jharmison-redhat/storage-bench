@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: storage-bench
+spec:
+  storageClassName: gp3-csi

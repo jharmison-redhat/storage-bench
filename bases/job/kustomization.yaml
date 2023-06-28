@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configMapGenerator:
+- name: fio-config
+  files:
+  - config/entrypoint.sh
+  - config/bench.fio
+
+resources:
+- pvc.yaml
+- rbac.yaml
+- job.yaml

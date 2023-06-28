@@ -1,0 +1,46 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: storage-bench
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      serviceAccount: fio
+      serviceAccountName: fio
+      containers:
+      - name: fio
+        image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/jobs/entrypoint.sh"]
+        args: []
+        workingDir: /test
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        resources:
+          requests:
+            memory: 2Gi
+            cpu: 4
+          limits:
+            memory: 8Gi
+            cpu: 5
+        volumeMounts:
+        - mountPath: /jobs
+          name: fio-config
+        - mountPath: /test
+          name: pvc-under-test
+      volumes:
+      - name: fio-config
+        configMap:
+          name: fio-config
+          defaultMode: 493
+      - name: pvc-under-test
+        persistentVolumeClaim:
+          claimName: storage-bench
+      restartPolicy: Never
